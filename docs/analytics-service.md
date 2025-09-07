@@ -6,7 +6,7 @@ The Analytics Service provides comprehensive tracking and reporting for the Slac
 
 - **Event Logging**: Tracks all bot interactions with detailed metadata
 - **Thread-Safe Writing**: Batched writes with automatic flushing for concurrent operations
-- **Token Usage Tracking**: Records Claude API token consumption for cost analysis
+- **Token Usage Tracking**: Records Gemini API token consumption for cost analysis
 - **Error Monitoring**: Captures and categorizes error events
 - **Performance Metrics**: Response time tracking and analysis
 - **Date-Based Organization**: Automatic log rotation by date
@@ -39,7 +39,7 @@ interface AnalyticsEvent {
   command?: string;          // Bot command executed
   query?: string;            // Natural language query
   responseTime: number;      // Response time in milliseconds
-  tokensUsed?: {            // Claude API token usage
+  tokensUsed?: {            // Gemini API token usage
     input: number;
     output: number;
     total: number;

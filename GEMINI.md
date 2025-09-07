@@ -1,15 +1,15 @@
-# Claude Code Project Instructions
+# Gemini Code Project Instructions
 
 ## Project: Ninja Bot - Slack AI Assistant
 
 ### Project Overview
-This is a Slack bot that integrates with Claude AI to provide intelligent conversation analysis, summaries, and Q&A capabilities. The bot uses Socket Mode for real-time event handling and TypeScript for type safety.
+This is a Slack bot that integrates with Google Gemini AI to provide intelligent conversation analysis, summaries, and Q&A capabilities. The bot uses Socket Mode for real-time event handling and TypeScript for type safety.
 
 ### Key Architecture Decisions
 
 1. **Socket Mode over Webhooks**: Using Socket Mode eliminates the need for public URLs and simplifies deployment
-2. **TypeScript**: Provides type safety and better IDE support for Slack and Claude API integrations
-3. **Service Layer Pattern**: Separated Slack and Claude logic into distinct services for maintainability
+2. **TypeScript**: Provides type safety and better IDE support for Slack and Gemini API integrations
+3. **Service Layer Pattern**: Separated Slack and Gemini logic into distinct services for maintainability
 4. **Command Pattern**: Implemented extensible command system for easy feature additions
 
 ### Learnings & Best Practices
@@ -33,9 +33,9 @@ This is a Slack bot that integrates with Claude AI to provide intelligent conver
 - **Reactions**: Use reactions (`thinking_face`, `white_check_mark`, `x`) for better UX
 - **Socket Mode Requirements**: Both `SLACK_BOT_TOKEN` and `SLACK_APP_TOKEN` are required
 
-#### Claude Integration
+#### Gemini Integration
 - **Structured Prompts**: Format conversation context clearly with user identifiers
-- **Error Handling**: Always wrap Claude API calls in try-catch blocks
+- **Error Handling**: Always wrap Gemini API calls in try-catch blocks
 - **Token Management**: Configure max_tokens appropriately for different command types
 
 ### Common Commands
@@ -61,12 +61,12 @@ Required:
 - `SLACK_BOT_TOKEN`: Bot User OAuth Token (xoxb-...)
 - `SLACK_SIGNING_SECRET`: App signing secret
 - `SLACK_APP_TOKEN`: App-level token for Socket Mode (xapp-...)
-- `ANTHROPIC_API_KEY`: Claude API key
+- `GEMINI_API_KEY`: Google Gemini API key
 
 Optional:
-- `CLAUDE_MODEL`: Model to use (default: claude-3-5-sonnet-20241022)
-- `CLAUDE_MAX_TOKENS`: Max response tokens (default: 4096)
-- `CLAUDE_TEMPERATURE`: Response creativity (default: 0.7)
+- `GEMINI_MODEL`: Model to use (default: gemini-2.0-flash-exp)
+- `GEMINI_MAX_TOKENS`: Max response tokens (default: 4096)
+- `GEMINI_TEMPERATURE`: Response creativity (default: 0.7)
 - `LOG_LEVEL`: Logging verbosity (debug|info|warn|error)
 
 ### Project Structure Rationale
@@ -74,7 +74,7 @@ Optional:
 ```
 src/
 ├── handlers/    # Event handling logic, separated from services
-├── services/    # Business logic for Slack and Claude
+├── services/    # Business logic for Slack and Gemini
 ├── types/       # Centralized TypeScript definitions
 ├── utils/       # Shared utilities (config, logger)
 └── index.ts     # Application entry point with minimal logic
@@ -93,7 +93,7 @@ Before deployment:
 
 ### Future Enhancements
 
-1. **Rate Limiting**: Implement per-user rate limits for Claude API calls
+1. **Rate Limiting**: Implement per-user rate limits for Gemini API calls
 2. **Caching**: Cache thread summaries to reduce API calls
 3. **Analytics**: Track command usage and response times
 4. **Custom Commands**: Allow workspace admins to define custom commands
@@ -107,7 +107,7 @@ Before deployment:
 | Bot not responding | Check Socket Mode is enabled and app_token is correct |
 | "Missing required environment variables" | Ensure all tokens are set in .env file |
 | Connection errors | Verify network connectivity and Slack API status |
-| Claude API errors | Check API key validity and rate limits |
+| Gemini API errors | Check API key validity and rate limits |
 | Type errors | Run `npm run typecheck` to identify issues |
 
 ### Security Notes

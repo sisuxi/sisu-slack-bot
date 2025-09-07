@@ -4,7 +4,7 @@ export interface Config {
     signingSecret: string;
     appToken: string;
   };
-  anthropic: {
+  gemini: {
     apiKey: string;
     model: string;
     maxTokens: number;

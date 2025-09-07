@@ -9,11 +9,11 @@ export const config: Config = {
     signingSecret: process.env.SLACK_SIGNING_SECRET || '',
     appToken: process.env.SLACK_APP_TOKEN || '',
   },
-  anthropic: {
-    apiKey: process.env.ANTHROPIC_API_KEY || '',
-    model: process.env.CLAUDE_MODEL || 'claude-3-5-sonnet-20241022',
-    maxTokens: parseInt(process.env.CLAUDE_MAX_TOKENS || '4096'),
-    temperature: parseFloat(process.env.CLAUDE_TEMPERATURE || '0.7'),
+  gemini: {
+    apiKey: process.env.GEMINI_API_KEY || '',
+    model: process.env.GEMINI_MODEL || 'gemini-2.0-flash-exp',
+    maxTokens: parseInt(process.env.GEMINI_MAX_TOKENS || '8192'),
+    temperature: parseFloat(process.env.GEMINI_TEMPERATURE || '0.7'),
   },
   bot: {
     name: process.env.BOT_NAME || 'ninja-bot',
@@ -27,7 +27,7 @@ export function validateConfig(): void {
     { value: config.slack.botToken, name: 'SLACK_BOT_TOKEN' },
     { value: config.slack.signingSecret, name: 'SLACK_SIGNING_SECRET' },
     { value: config.slack.appToken, name: 'SLACK_APP_TOKEN' },
-    { value: config.anthropic.apiKey, name: 'ANTHROPIC_API_KEY' },
+    { value: config.gemini.apiKey, name: 'GEMINI_API_KEY' },
   ];
 
   const missing = required.filter(item => !item.value).map(item => item.name);
