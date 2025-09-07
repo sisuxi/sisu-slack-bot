@@ -1,6 +1,6 @@
 # Ninja Bot - Slack AI Assistant
 
-A powerful Slack bot that integrates with Claude AI to provide intelligent conversation analysis, summaries, and Q&A capabilities for your Slack workspace.
+A powerful Slack bot that integrates with Google Gemini AI to provide intelligent conversation analysis, summaries, and Q&A capabilities for your Slack workspace.
 
 ## Features
 
@@ -17,7 +17,7 @@ A powerful Slack bot that integrates with Claude AI to provide intelligent conve
 - Node.js 20+ 
 - Docker and Docker Compose (for containerized deployment)
 - Slack Workspace with admin access
-- Claude API key from Anthropic
+- Gemini API key from Google
 
 ## Slack App Setup
 
@@ -84,16 +84,16 @@ A powerful Slack bot that integrates with Claude AI to provide intelligent conve
    SLACK_SIGNING_SECRET=your-signing-secret
    SLACK_APP_TOKEN=xapp-your-app-token
    
-   # Claude API Configuration
-   ANTHROPIC_API_KEY=your-anthropic-api-key
+   # Gemini API Configuration
+   GEMINI_API_KEY=your-gemini-api-key
    
    # Bot Configuration (optional)
    BOT_NAME=ninja-bot
    PORT=3000
    LOG_LEVEL=info
-   CLAUDE_MODEL=claude-3-5-sonnet-20241022
-   CLAUDE_MAX_TOKENS=4096
-   CLAUDE_TEMPERATURE=0.7
+   GEMINI_MODEL=gemini-2.0-flash-exp
+   GEMINI_MAX_TOKENS=4096
+   GEMINI_TEMPERATURE=0.7
    ```
 
 ## Usage
@@ -161,7 +161,7 @@ ninja-bot/
 │   │   ├── commands.ts # Command definitions
 │   │   └── events.ts   # Event handling logic
 │   ├── services/       # Service layer
-│   │   ├── claude.service.ts  # Claude AI integration
+│   │   ├── gemini.service.ts  # Gemini AI integration
 │   │   └── slack.service.ts   # Slack API wrapper
 │   ├── types/          # TypeScript type definitions
 │   │   └── index.ts
@@ -213,8 +213,8 @@ npm run format
 3. Ensure Socket Mode is enabled
 4. Verify app permissions are correctly configured
 
-### Claude API errors
-1. Verify Anthropic API key is valid
+### Gemini API errors
+1. Verify Google Gemini API key is valid
 2. Check API rate limits
 3. Ensure model name is correct
 
@@ -247,6 +247,6 @@ For issues and questions:
 ## Acknowledgments
 
 - Built with [Slack Bolt](https://slack.dev/bolt-js)
-- Powered by [Claude AI](https://www.anthropic.com/claude)
+- Powered by [Google Gemini AI](https://ai.google.dev/gemini-api)
 - TypeScript for type safety
 - Docker for containerization

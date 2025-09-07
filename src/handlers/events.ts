@@ -1,13 +1,13 @@
 import { App } from '@slack/bolt';
 import { SlackService } from '../services/slack.service';
-import { ClaudeService } from '../services/claude.service';
+import { GeminiService } from '../services/gemini.service';
 import { AnalyticsService } from '../services/analytics.service';
 import { SlackMessage, ThreadContext } from '../types/index';
 import { commands } from './commands';
 import { logger } from '../utils/logger';
 
 const slackService = new SlackService();
-const claudeService = new ClaudeService();
+const geminiService = new GeminiService();
 const analyticsService = new AnalyticsService();
 
 // Export analytics service for cleanup
@@ -49,42 +49,28 @@ async function getChannelMessagesSince(channel: string, sinceTimestamp: number):
 
 
 // Helper function to auto-summarize thread with usage tracking
-async function autoSummarizeThreadWithUsage(threadContext: ThreadContext): Promise<{content: string, usage?: {input_tokens: number, output_tokens: number}}> {
+async function autoSummarizeThreadWithUsage(threadContext: ThreadContext): Promise<{summary: string, usage?: {input_tokens: number, output_tokens: number}}> {
   try {
-    const messages = threadContext.messages
-      .map(msg => `[${msg.user}]: ${msg.text}`)
-      .join('\n');
-
-    const prompt = `Please analyze this Slack thread and provide:
-1. A concise summary of the key discussion points
-2. Clear action items with owners if mentioned
-3. Next steps or decisions needed
-
-Thread conversation:
-${messages}
-
-Format your response with clear sections for Summary, Action Items, and Next Steps.`;
-
-    const response = await claudeService.sendMessage({ prompt });
+    const result = await geminiService.autoSummarizeThreadWithUsage(threadContext);
     return {
-      content: `🧵 **Thread Summary**\n\n${response.content}`,
-      usage: response.usage
+      summary: `🧵 **Thread Summary**\n\n${result.summary}`,
+      usage: result.usage
     };
   } catch (error) {
     logger.error('Error auto-summarizing thread', error);
-    return { content: 'Sorry, I encountered an error while summarizing this thread. Please try again.' };
+    return { summary: 'Sorry, I encountered an error while summarizing this thread. Please try again.' };
   }
 }
 
 
 // Helper function to auto-summarize channel with usage tracking
-async function autoSummarizeChannelWithUsage(channel: string): Promise<{content: string, usage?: {input_tokens: number, output_tokens: number}}> {
+async function autoSummarizeChannelWithUsage(channel: string): Promise<{summary: string, usage?: {input_tokens: number, output_tokens: number}}> {
   try {
     const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
     const messages = await getChannelMessagesSince(channel, oneDayAgo);
     
     if (messages.length === 0) {
-      return { content: '📭 No messages in this channel from the last 24 hours to summarize.' };
+      return { summary: '📭 No messages in this channel from the last 24 hours to summarize.' };
     }
 
     const messageText = messages
@@ -92,25 +78,14 @@ async function autoSummarizeChannelWithUsage(channel: string): Promise<{content:
       .map(msg => `[${msg.user}]: ${msg.text}`)
       .join('\n');
 
-    const prompt = `Please analyze the last 24 hours of this Slack channel and provide:
-1. A concise summary of key discussions and topics
-2. Important decisions made
-3. Action items and next steps
-4. Any urgent matters that need attention
-
-Channel messages (last 24 hours):
-${messageText}
-
-Format your response with clear sections for Summary, Key Decisions, Action Items, and Urgent Matters.`;
-
-    const response = await claudeService.sendMessage({ prompt });
+    const result = await geminiService.autoSummarizeChannelWithUsage(messageText);
     return {
-      content: `📅 **24-Hour Channel Summary**\n\n${response.content}`,
-      usage: response.usage
+      summary: `📅 **24-Hour Channel Summary**\n\n${result.summary}`,
+      usage: result.usage
     };
   } catch (error) {
     logger.error('Error auto-summarizing channel', error);
-    return { content: 'Sorry, I encountered an error while summarizing this channel. Please try again.' };
+    return { summary: 'Sorry, I encountered an error while summarizing this channel. Please try again.' };
   }
 }
 
@@ -155,19 +130,19 @@ async function handleAppMention(event: any, say: any): Promise<void> {
       if (event.thread_ts) {
         // In a thread: summarize the thread
         const threadContext = await slackService.getThreadMessages(event.channel, event.thread_ts);
-        const claudeResponse = await autoSummarizeThreadWithUsage(threadContext);
+        const geminiResponse = await autoSummarizeThreadWithUsage(threadContext);
         
         // Capture token usage
-        if (claudeResponse.usage) {
+        if (geminiResponse.usage) {
           tokensUsed = {
-            input: claudeResponse.usage.input_tokens,
-            output: claudeResponse.usage.output_tokens,
-            total: claudeResponse.usage.input_tokens + claudeResponse.usage.output_tokens,
+            input: geminiResponse.usage.input_tokens,
+            output: geminiResponse.usage.output_tokens,
+            total: geminiResponse.usage.input_tokens + geminiResponse.usage.output_tokens,
           };
         }
         
         await say({
-          text: claudeResponse.content,
+          text: geminiResponse.summary,
           thread_ts: event.thread_ts,
         });
       } else if (event.channel_type === 'im') {
@@ -181,19 +156,19 @@ async function handleAppMention(event: any, say: any): Promise<void> {
         }
       } else {
         // In channel (not thread): summarize last 24 hours
-        const claudeResponse = await autoSummarizeChannelWithUsage(event.channel);
+        const geminiResponse = await autoSummarizeChannelWithUsage(event.channel);
         
         // Capture token usage
-        if (claudeResponse.usage) {
+        if (geminiResponse.usage) {
           tokensUsed = {
-            input: claudeResponse.usage.input_tokens,
-            output: claudeResponse.usage.output_tokens,
-            total: claudeResponse.usage.input_tokens + claudeResponse.usage.output_tokens,
+            input: geminiResponse.usage.input_tokens,
+            output: geminiResponse.usage.output_tokens,
+            total: geminiResponse.usage.input_tokens + geminiResponse.usage.output_tokens,
           };
         }
         
         await say({
-          text: claudeResponse.content,
+          text: geminiResponse.summary,
           thread_ts: event.ts, // Start a new thread
         });
       }
@@ -226,25 +201,25 @@ async function handleAppMention(event: any, say: any): Promise<void> {
             thread_ts: event.thread_ts || event.ts,
           });
         } else {
-          // Treat as a question for Claude
+          // Treat as a question for Gemini
           queryText = cleanText;
           const context = event.thread_ts
             ? await slackService.getThreadMessages(event.channel, event.thread_ts)
             : undefined;
 
-          const claudeResponse = await claudeService.answerQuestionWithUsage(cleanText, context);
+          const geminiResponse = await geminiService.answerQuestionWithUsage(cleanText, context);
           
           // Capture token usage
-          if (claudeResponse.usage) {
+          if (geminiResponse.usage) {
             tokensUsed = {
-              input: claudeResponse.usage.input_tokens,
-              output: claudeResponse.usage.output_tokens,
-              total: claudeResponse.usage.input_tokens + claudeResponse.usage.output_tokens,
+              input: geminiResponse.usage.input_tokens,
+              output: geminiResponse.usage.output_tokens,
+              total: geminiResponse.usage.input_tokens + geminiResponse.usage.output_tokens,
             };
           }
           
           await say({
-            text: claudeResponse.content,
+            text: geminiResponse.answer,
             thread_ts: event.thread_ts || event.ts,
           });
         }
@@ -345,20 +320,20 @@ async function handleDirectMessage(event: any, say: any): Promise<void> {
         const response = await command.handler(args, {} as any);
         await say(response);
       } else {
-        // Treat as a question for Claude
+        // Treat as a question for Gemini
         queryText = text;
-        const claudeResponse = await claudeService.answerQuestionWithUsage(text);
+        const geminiResponse = await geminiService.answerQuestionWithUsage(text);
         
         // Capture token usage
-        if (claudeResponse.usage) {
+        if (geminiResponse.usage) {
           tokensUsed = {
-            input: claudeResponse.usage.input_tokens,
-            output: claudeResponse.usage.output_tokens,
-            total: claudeResponse.usage.input_tokens + claudeResponse.usage.output_tokens,
+            input: geminiResponse.usage.input_tokens,
+            output: geminiResponse.usage.output_tokens,
+            total: geminiResponse.usage.input_tokens + geminiResponse.usage.output_tokens,
           };
         }
         
-        await say(claudeResponse.content);
+        await say(geminiResponse.answer);
       }
     } else {
       // Empty message, show help

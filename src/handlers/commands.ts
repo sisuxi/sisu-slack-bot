@@ -1,8 +1,8 @@
 import { BotCommand, ThreadContext } from '../types/index';
-import { ClaudeService } from '../services/claude.service';
+import { GeminiService } from '../services/gemini.service';
 import { logger } from '../utils/logger';
 
-const claudeService = new ClaudeService();
+const geminiService = new GeminiService();
 
 export const commands: Map<string, BotCommand> = new Map([
   [
@@ -12,7 +12,7 @@ export const commands: Map<string, BotCommand> = new Map([
       description: 'Summarize the current thread or channel messages',
       handler: async (_args: string[], context: ThreadContext) => {
         logger.info('Executing summarize command');
-        return await claudeService.summarizeThread(context);
+        return await geminiService.summarizeThread(context);
       },
     },
   ],
@@ -24,7 +24,7 @@ export const commands: Map<string, BotCommand> = new Map([
       handler: async (args: string[], context: ThreadContext) => {
         const analysisType = args[0] || 'general';
         logger.info(`Executing analyze command with type: ${analysisType}`);
-        return await claudeService.analyzeThread(context, analysisType);
+        return await geminiService.analyzeThread(context, analysisType);
       },
     },
   ],
@@ -35,7 +35,7 @@ export const commands: Map<string, BotCommand> = new Map([
       description: 'Extract action items from the thread',
       handler: async (_args: string[], context: ThreadContext) => {
         logger.info('Extracting action items');
-        return await claudeService.analyzeThread(context, 'action-items');
+        return await geminiService.analyzeThread(context, 'action-items');
       },
     },
   ],
@@ -46,7 +46,7 @@ export const commands: Map<string, BotCommand> = new Map([
       description: 'List decisions made in the thread',
       handler: async (_args: string[], context: ThreadContext) => {
         logger.info('Extracting decisions');
-        return await claudeService.analyzeThread(context, 'decisions');
+        return await geminiService.analyzeThread(context, 'decisions');
       },
     },
   ],

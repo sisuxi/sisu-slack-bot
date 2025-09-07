@@ -22,6 +22,7 @@
   "license": "MIT",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.61.0",
+    "@google/generative-ai": "^0.24.1",
     "@slack/bolt": "^4.4.0",
     "@slack/web-api": "^7.10.0",
     "dotenv": "^17.2.2"
