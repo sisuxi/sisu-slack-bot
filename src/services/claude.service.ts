@@ -1,7 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { config } from '../utils/config.js';
-import { logger } from '../utils/logger.js';
-import { ClaudeRequest, ClaudeResponse, ThreadContext } from '../types/index.js';
+import { config } from '../utils/config';
+import { logger } from '../utils/logger';
+import { ClaudeRequest, ClaudeResponse, ThreadContext } from '../types/index';
 
 export class ClaudeService {
   private client: Anthropic;
@@ -86,6 +86,24 @@ Please answer this question: ${question}`;
 
     const response = await this.sendMessage({ prompt });
     return response.content;
+  }
+
+  async answerQuestionWithUsage(question: string, context?: ThreadContext): Promise<ClaudeResponse> {
+    let prompt = question;
+
+    if (context) {
+      const messages = context.messages
+        .map(msg => `[${msg.user}]: ${msg.text}`)
+        .join('\n');
+
+      prompt = `Based on the following Slack conversation thread:
+
+${messages}
+
+Please answer this question: ${question}`;
+    }
+
+    return await this.sendMessage({ prompt });
   }
 
   async analyzeThread(context: ThreadContext, analysisType: string): Promise<string> {

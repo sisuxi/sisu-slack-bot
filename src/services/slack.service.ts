@@ -1,13 +1,18 @@
 import { WebClient } from '@slack/web-api';
-import { config } from '../utils/config.js';
-import { logger } from '../utils/logger.js';
-import { SlackMessage, ThreadContext } from '../types/index.js';
+import { config } from '../utils/config';
+import { logger } from '../utils/logger';
+import { SlackMessage, ThreadContext } from '../types/index';
 
 export class SlackService {
   private client: WebClient;
 
   constructor() {
     this.client = new WebClient(config.slack.botToken);
+  }
+
+  // Expose client for advanced operations in event handlers
+  getClient(): WebClient {
+    return this.client;
   }
 
   async getThreadMessages(channel: string, thread_ts: string): Promise<ThreadContext> {
