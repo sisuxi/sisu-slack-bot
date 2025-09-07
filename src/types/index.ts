@@ -53,3 +53,6 @@ export interface BotCommand {
   description: string;
   handler: (args: string[], context: ThreadContext) => Promise<string>;
 }
+
+// Re-export analytics types
+export * from './analytics';

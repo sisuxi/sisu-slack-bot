@@ -9,7 +9,8 @@
     "dev": "tsx watch src/index.ts",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write \"src/**/*.ts\"",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:analytics": "tsx scripts/test-analytics.ts"
   },
   "keywords": [
     "slack",
@@ -19,7 +20,6 @@
   ],
   "author": "",
   "license": "MIT",
-  "type": "module",
   "dependencies": {
     "@anthropic-ai/sdk": "^0.61.0",
     "@slack/bolt": "^4.4.0",

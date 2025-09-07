@@ -1,7 +1,7 @@
 import { App } from '@slack/bolt';
-import { config, validateConfig } from './utils/config.js';
-import { logger } from './utils/logger.js';
-import { registerEventHandlers } from './handlers/events.js';
+import { config, validateConfig } from './utils/config';
+import { logger } from './utils/logger';
+import { registerEventHandlers, analyticsService } from './handlers/events';
 
 async function startBot(): Promise<void> {
   try {
@@ -30,12 +30,14 @@ async function startBot(): Promise<void> {
     // Handle graceful shutdown
     process.on('SIGINT', async () => {
       logger.info('Shutting down bot...');
+      await analyticsService.cleanup();
       await app.stop();
       process.exit(0);
     });
 
     process.on('SIGTERM', async () => {
       logger.info('Shutting down bot...');
+      await analyticsService.cleanup();
       await app.stop();
       process.exit(0);
     });
